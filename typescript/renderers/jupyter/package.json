@@ -1,0 +1,79 @@
+{
+  "name": "@a2ui/jupyter",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "description": "JupyterLab renderer for A2UI",
+  "homepage": "https://a2ui.org/",
+  "repository": {
+    "directory": "typescript/renderers/jupyter",
+    "type": "git",
+    "url": "git+https://github.com/a2ui-project/a2ui.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "wireit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "wireit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "clean": "wireit"
+  },
+  "dependencies": {
+    "@a2ui/markdown-it": "workspace:*",
+    "@a2ui/react": "workspace:*",
+    "@a2ui/web_core": "workspace:*",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "esbuild": "0.28.1",
+    "eslint": "^10.4.1",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.4",
+    "typescript": "5.9.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8",
+    "wireit": "^0.15.0-pre.2"
+  },
+  "wireit": {
+    "build": {
+      "command": "node scripts/build.mjs",
+      "dependencies": [
+        "../../core/web_core:build",
+        "../markdown-it:build",
+        "../react:build"
+      ],
+      "files": [
+        "src/**/*",
+        "scripts/**/*"
+      ],
+      "output": [
+        "dist/widget.js",
+        "dist/widget.css"
+      ]
+    },
+    "test": {
+      "command": "vitest run",
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "src/**/*",
+        "tests/**/*",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ]
+    },
+    "clean": {
+      "command": "rm -rf dist .wireit && rm -f ../../../python/a2ui_jupyter/src/a2ui_jupyter/static/widget.js ../../../python/a2ui_jupyter/src/a2ui_jupyter/static/widget.css"
+    }
+  }
+}
