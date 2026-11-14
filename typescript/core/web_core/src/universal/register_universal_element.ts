@@ -48,7 +48,9 @@ export function registerUniversalElement(component: WebComponentImplementation):
     return;
   }
 
-  if (existing !== component.element) {
+  // Identical source means the same element evaluated again (for example, a widget module loaded
+  // once per model), so the registered definition can serve both.
+  if (existing !== component.element && existing.toString() !== component.element.toString()) {
     throw new Error(
       `Custom element tag name collision for "${component.tagName}": ` +
         `attempted to register ${component.element.name || 'anonymous constructor'}, ` +

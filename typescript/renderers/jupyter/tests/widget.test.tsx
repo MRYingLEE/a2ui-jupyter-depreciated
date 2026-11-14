@@ -22,7 +22,7 @@ import {
   setMarkdownRenderer,
 } from '@a2ui/web_core/catalogs/basic/v1';
 import {z} from 'zod';
-import {mountA2uiWidget} from '../src/widget';
+import widget, {mountA2uiWidget} from '../src/widget';
 
 class TestModel {
   readonly sent: unknown[] = [];
@@ -54,6 +54,13 @@ class TestModel {
   emit(content: unknown): void {
     for (const listener of this.listeners.get('msg:custom') ?? []) {
       listener(content);
+    }
+  }
+
+  changeAttribute(name: string, value: unknown): void {
+    this.attributes.set(name, value);
+    for (const listener of this.listeners.get(`change:${name}`) ?? []) {
+      listener(value);
     }
   }
 }
@@ -136,6 +143,47 @@ describe('JupyterLab widget bridge', () => {
     await waitFor(() => expect(element).toHaveTextContent('Hello, Lin'));
     dispose();
     expect(element).toBeEmptyDOMElement();
+  });
+
+  it('applies a message log that is synced after the view mounts', async () => {
+    const messages = surfaceMessages([
+      {id: 'root', component: 'Column', children: ['label']},
+      {id: 'label', component: 'Text', text: {'@path': '/greeting'}},
+    ]);
+    const log = messages.map((message, sequence) => createMessage(sequence, message));
+    const model = new TestModel(log.slice(0, 1));
+    const element = document.createElement('div');
+    document.body.append(element);
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const dispose = mountA2uiWidget(model, element);
+
+    model.emit({type: 'a2ui', ...log[2]});
+    model.changeAttribute('message_log', log);
+
+    await waitFor(() => expect(element).toHaveTextContent('Hello, Ada'));
+    expect(errorSpy).not.toHaveBeenCalled();
+    dispose();
+  });
+
+  it('renders surfaces from a later evaluation of the widget module', async () => {
+    const messages = surfaceMessages([{id: 'root', component: 'Text', text: 'Hello, Grace'}]);
+    const log = messages.map((message, sequence) => createMessage(sequence, message));
+    const firstElement = document.createElement('div');
+    const firstModel = new TestModel(log);
+    document.body.append(firstElement);
+    const disposeFirst = widget.render({model: firstModel, el: firstElement});
+
+    vi.resetModules();
+    const laterWidget = (await import('../src/widget')).default;
+    const element = document.createElement('div');
+    const model = new TestModel(log);
+    document.body.append(element);
+    const dispose = laterWidget.render({model, el: element});
+
+    await waitFor(() => expect(element).toHaveTextContent('Hello, Grace'));
+    dispose();
+    disposeFirst();
+    delete (globalThis as Record<symbol, unknown>)[Symbol.for('@a2ui/jupyter/mountA2uiWidget')];
   });
 
   it('sends an action only after resolving its context', async () => {

@@ -80,6 +80,29 @@ describe('registerUniversalElement', () => {
     assert.strictEqual(registry.get('a2ui-test'), MockElementA);
   });
 
+  it('no-ops when the same element is evaluated again from another module instance', () => {
+    const defineElement = () => class extends HTMLElement {};
+    const first = defineElement();
+    const second = defineElement();
+    assert.notStrictEqual(first, second);
+
+    registerUniversalElement({
+      name: 'Test',
+      schema: z.object({}),
+      tagName: 'a2ui-test',
+      element: first,
+    });
+    assert.doesNotThrow(() => {
+      registerUniversalElement({
+        name: 'Test',
+        schema: z.object({}),
+        tagName: 'a2ui-test',
+        element: second,
+      });
+    });
+    assert.strictEqual(registry.get('a2ui-test'), first);
+  });
+
   it('throws an error when registered with a conflicting constructor', () => {
     const compA: WebComponentImplementation = {
       name: 'TestA',

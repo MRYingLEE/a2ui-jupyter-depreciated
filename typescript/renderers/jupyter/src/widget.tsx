@@ -41,6 +41,8 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+const MOUNT_KEY = Symbol.for('@a2ui/jupyter/mountA2uiWidget');
+
 function SurfaceList({processor}: {processor: MessageProcessor<ReactCatalogComponent>}) {
   const [surfaces, setSurfaces] = useState(() => Array.from(processor.model.surfacesMap.entries()));
 
@@ -104,6 +106,7 @@ export function mountA2uiWidget(
     outboundListener: sendToKernel,
     reportErrorsOnly: true,
   });
+  const errorSub = processor.model.onError.subscribe(showError);
   const root = createRoot(app);
   root.render(
     <MarkdownContext.Provider value={renderMarkdown}>
@@ -122,11 +125,7 @@ export function mountA2uiWidget(
       showError(new Error('Invalid message log sequence.'));
       return;
     }
-    if (sequence < nextSequence) {
-      return;
-    }
-    if (queued.has(sequence)) {
-      showError(new Error(`Duplicate message log sequence ${sequence}.`));
+    if (sequence < nextSequence || queued.has(sequence)) {
       return;
     }
     queued.set(sequence, message);
@@ -146,8 +145,13 @@ export function mountA2uiWidget(
     }
   };
 
-  const replay = model.get('message_log');
-  if (Array.isArray(replay)) {
+  // The log can sync after this view mounts, and custom messages sent before
+  // mounting never reach this view. Re-reading the log on change recovers both.
+  const replayMessageLog = () => {
+    const replay = model.get('message_log');
+    if (!Array.isArray(replay)) {
+      return;
+    }
     for (const item of replay) {
       if (!isRecord(item)) {
         showError(new Error('Invalid message log entry.'));
@@ -155,7 +159,8 @@ export function mountA2uiWidget(
       }
       acceptEntry(item['sequence'], item['message']);
     }
-  }
+  };
+  replayMessageLog();
 
   const onCustomMessage = (content: unknown) => {
     if (!isRecord(content) || content['type'] !== 'a2ui') {
@@ -164,10 +169,13 @@ export function mountA2uiWidget(
     }
     acceptEntry(content['sequence'], content['message']);
   };
+  model.on('change:message_log', replayMessageLog);
   model.on('msg:custom', onCustomMessage);
 
   return () => {
+    model.off('change:message_log', replayMessageLog);
     model.off('msg:custom', onCustomMessage);
+    errorSub.unsubscribe();
     root.unmount();
     processor.dispose();
     element.replaceChildren();
@@ -176,6 +184,11 @@ export function mountA2uiWidget(
 
 export default {
   render({model, el}: {model: WidgetModel; el: HTMLElement}) {
-    return mountA2uiWidget(model, el);
+    // anywidget evaluates this module again for each cell. Each evaluation has its own copy of
+    // web_core, and its element classes only accept nodes from that copy (they check with
+    // `instanceof`). Mounting every view through the first evaluation keeps one runtime per page.
+    const mount = ((globalThis as Record<symbol, unknown>)[MOUNT_KEY] ??=
+      mountA2uiWidget) as typeof mountA2uiWidget;
+    return mount(model, el);
   },
 };
