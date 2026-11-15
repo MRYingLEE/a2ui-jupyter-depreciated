@@ -222,6 +222,45 @@ describe('JupyterLab widget bridge', () => {
     dispose();
   });
 
+  it('hides a submitted surface until replacement components arrive', async () => {
+    const messages = surfaceMessages([
+      {
+        id: 'root',
+        component: 'Button',
+        child: 'label',
+        action: {event: {name: 'submit', context: {name: {'@path': '/name'}}}},
+      },
+      {id: 'label', component: 'Text', text: 'Submit'},
+    ]);
+    const model = new TestModel(
+      messages.map((message, sequence) => createMessage(sequence, message)),
+    );
+    const element = document.createElement('div');
+    document.body.append(element);
+    const dispose = mountA2uiWidget(model, element);
+
+    await waitFor(() => expect(within(element).getByRole('button')).toBeInTheDocument());
+    fireEvent.click(within(element).getByRole('button'));
+
+    await waitFor(() => expect(model.sent).toHaveLength(1));
+    await waitFor(() => expect(within(element).queryByRole('button')).toBeNull());
+
+    model.emit({
+      type: 'a2ui',
+      sequence: 3,
+      message: {
+        version: '1.0',
+        updateComponents: {
+          surfaceId: 'surface-1',
+          components: [{id: 'root', component: 'Text', text: 'Submitted'}],
+        },
+      },
+    });
+
+    await waitFor(() => expect(element).toHaveTextContent('Submitted'));
+    dispose();
+  });
+
   it('routes agent function calls and matching responses through the kernel', async () => {
     const agentCatalog = v1BasicCatalog.copyWith({
       agentFunctions: [

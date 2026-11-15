@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useSyncExternalStore} from 'react';
 import {createRoot} from 'react-dom/client';
 import {renderMarkdown} from '@a2ui/markdown-it';
 import {A2uiSurface, MarkdownContext} from '@a2ui/react';
@@ -49,8 +49,53 @@ function describeError(error: unknown): string {
 
 const MOUNT_KEY = Symbol.for('@a2ui/jupyter/mountA2uiWidget');
 
-function SurfaceList({processor}: {processor: MessageProcessor<ReactCatalogComponent>}) {
+interface SurfaceVisibility {
+  getSnapshot: () => ReadonlySet<string>;
+  subscribe: (listener: () => void) => () => void;
+  hide: (surfaceId: string) => void;
+  show: (surfaceId: string) => void;
+}
+
+function createSurfaceVisibility(): SurfaceVisibility {
+  let hiddenSurfaceIds = new Set<string>();
+  const listeners = new Set<() => void>();
+  const update = (surfaceId: string, hidden: boolean) => {
+    if (hiddenSurfaceIds.has(surfaceId) === hidden) {
+      return;
+    }
+    hiddenSurfaceIds = new Set(hiddenSurfaceIds);
+    if (hidden) {
+      hiddenSurfaceIds.add(surfaceId);
+    } else {
+      hiddenSurfaceIds.delete(surfaceId);
+    }
+    listeners.forEach(listener => listener());
+  };
+
+  return {
+    getSnapshot: () => hiddenSurfaceIds,
+    subscribe: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    hide: surfaceId => update(surfaceId, true),
+    show: surfaceId => update(surfaceId, false),
+  };
+}
+
+function SurfaceList({
+  processor,
+  visibility,
+}: {
+  processor: MessageProcessor<ReactCatalogComponent>;
+  visibility: SurfaceVisibility;
+}) {
   const [surfaces, setSurfaces] = useState(() => Array.from(processor.model.surfacesMap.entries()));
+  const hiddenSurfaceIds = useSyncExternalStore(
+    visibility.subscribe,
+    visibility.getSnapshot,
+    visibility.getSnapshot,
+  );
 
   useEffect(() => {
     const refresh = () => setSurfaces(Array.from(processor.model.surfacesMap.entries()));
@@ -65,15 +110,18 @@ function SurfaceList({processor}: {processor: MessageProcessor<ReactCatalogCompo
 
   return (
     <div className="a2ui-widget-surfaces">
-      {surfaces.map(([surfaceId, surface]) => (
-        <section
-          aria-label={`A2UI surface ${surfaceId}`}
-          className="a2ui-widget-surface"
-          key={surfaceId}
-        >
-          <A2uiSurface surface={surface} />
-        </section>
-      ))}
+      {surfaces.map(
+        ([surfaceId, surface]) =>
+          !hiddenSurfaceIds.has(surfaceId) && (
+            <section
+              aria-label={`A2UI surface ${surfaceId}`}
+              className="a2ui-widget-surface"
+              key={surfaceId}
+            >
+              <A2uiSurface surface={surface} />
+            </section>
+          ),
+      )}
     </div>
   );
 }
@@ -83,6 +131,7 @@ export function mountA2uiWidget(
   element: HTMLElement,
   catalogs: Catalog<ComponentApi, FunctionImplementation>[] = [basicCatalog],
 ): () => void {
+  const visibility = createSurfaceVisibility();
   const status = document.createElement('div');
   status.className = 'a2ui-widget-status';
   status.setAttribute('role', 'status');
@@ -102,6 +151,9 @@ export function mountA2uiWidget(
       return;
     }
     model.send({type: 'a2ui', message: result.data});
+    if ('action' in result.data && result.data.action.name.toLowerCase().includes('submit')) {
+      visibility.hide(result.data.action.surfaceId);
+    }
   };
 
   // The React renderer wraps catalog implementations before resolving nodes.
@@ -116,7 +168,7 @@ export function mountA2uiWidget(
   const root = createRoot(app);
   root.render(
     <MarkdownContext.Provider value={renderMarkdown}>
-      <SurfaceList processor={processor} />
+      <SurfaceList processor={processor} visibility={visibility} />
     </MarkdownContext.Provider>,
   );
   injectBasicCatalogStyles();
@@ -146,6 +198,11 @@ export function mountA2uiWidget(
           return;
         }
         await processor.processMessagesAsync([result.data]);
+        if ('createSurface' in result.data) {
+          visibility.show(result.data.createSurface.surfaceId);
+        } else if ('updateComponents' in result.data) {
+          visibility.show(result.data.updateComponents.surfaceId);
+        }
       });
       processing = processing.catch(showError);
     }
