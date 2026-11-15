@@ -349,6 +349,7 @@ describe('JupyterLab widget bridge', () => {
         error: {code: expect.any(String), message: expect.any(String)},
       },
     });
+    expect(within(element).getByRole('status')).not.toHaveTextContent('[object Object]');
     dispose();
   });
 

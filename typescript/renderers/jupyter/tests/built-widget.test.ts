@@ -106,7 +106,7 @@ describe('built anywidget module', () => {
               {
                 id: 'submit',
                 component: 'Button',
-                child: 'submit-label',
+                child: 'submit_label',
                 action: {
                   event: {
                     name: 'submit',
@@ -125,7 +125,9 @@ describe('built anywidget module', () => {
     document.body.append(element);
 
     const dispose = widgetModule.default.render({model, el: element});
-    await waitFor(() => expect(within(element).getByRole('button')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(within(element).getByRole('button', {name: 'Submit'})).toBeInTheDocument(),
+    );
     expect(element).toHaveTextContent('Waiting for submission');
     await waitFor(() => expect(element.querySelector('strong')).toHaveTextContent('submission'));
     expect(model.sent).toEqual([]);

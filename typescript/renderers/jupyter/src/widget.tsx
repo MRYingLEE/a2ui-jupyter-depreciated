@@ -38,7 +38,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function describeError(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (isRecord(error) && typeof error['message'] === 'string') {
+    return error['message'];
+  }
+  return String(error);
 }
 
 const MOUNT_KEY = Symbol.for('@a2ui/jupyter/mountA2uiWidget');
