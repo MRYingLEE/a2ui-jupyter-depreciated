@@ -48,6 +48,10 @@ export default defineConfig({
         replacement: path.resolve('../../core/web_core/src/v1_0/index.ts'),
       },
       {
+        find: '@a2ui/web_core/universal',
+        replacement: path.resolve('../../core/web_core/src/universal/index.ts'),
+      },
+      {
         find: '@a2ui/web_core/v0_9/basic_catalog',
         replacement: path.resolve('../../core/web_core/src/v0_9/basic_catalog/index.ts'),
       },

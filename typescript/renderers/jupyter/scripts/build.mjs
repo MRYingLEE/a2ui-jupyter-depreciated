@@ -26,8 +26,11 @@ const staticDirectory = path.resolve(root, '../../../python/a2ui_jupyter/src/a2u
 await mkdir(distDirectory, {recursive: true});
 await mkdir(staticDirectory, {recursive: true});
 await build({
-  entryPoints: [path.join(root, 'src/widget.tsx')],
-  outfile: path.join(distDirectory, 'widget.js'),
+  entryPoints: {
+    widget: path.join(root, 'src/widget.tsx'),
+    kernel: path.join(root, 'src/kernel.ts'),
+  },
+  outdir: distDirectory,
   bundle: true,
   format: 'esm',
   platform: 'browser',
