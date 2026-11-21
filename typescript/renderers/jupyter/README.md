@@ -89,7 +89,7 @@ documents message-log synchronization and saved widget state in
 
 For the JavaScript kernel, build the assets, host them together on a JupyterLite
 site, copy the example notebooks to its contents, and run
-[`manual_smoke_test.ipynb`](./examples/manual_smoke_test.ipynb). The test
+[`smoke_test.ipynb`](../../../python/a2ui_jupyter/examples/smoke_test.ipynb). The test
 displays a surface, sends an action, and reads it in a later cell. The
 [JupyterLite demo](https://github.com/MRYingLEE/jupyterlite-demo) contains a
 browser smoke test. For a JupyterLab test with a Python kernel, see
