@@ -64,7 +64,7 @@ Host `kernel.js`, `widget.js`, and `widget.css` together on the JupyterLite
 site. The JavaScript adapter imports the widget and stylesheet from URLs
 relative to `kernel.js`. The site must provide anywidget 0.11, matching the
 adapter's `~0.11.*` module version. See the [JavaScript examples README](./examples/README.md)
-for setup and the [JupyterLite demo](https://github.com/MRYingLEE/jupyterlite-demo)
+for setup and the [JupyterLite demo](https://github.com/MRYingLEE/a2ui-jupyterlite-demo.git)
 for deployment configuration and kernel smoke tests.
 
 The Python package also runs in JupyterLite with supported Python kernels.
@@ -91,7 +91,7 @@ For the JavaScript kernel, build the assets, host them together on a JupyterLite
 site, copy the example notebooks to its contents, and run
 [`smoke_test.ipynb`](../../../python/a2ui_jupyter/examples/smoke_test.ipynb). The test
 displays a surface, sends an action, and reads it in a later cell. The
-[JupyterLite demo](https://github.com/MRYingLEE/jupyterlite-demo) contains a
+[JupyterLite demo](https://github.com/MRYingLEE/a2ui-jupyterlite-demo.git) contains a
 browser smoke test. For a JupyterLab test with a Python kernel, see
 [Manual test](../../../python/a2ui_jupyter/README.md#manual-test).
 
@@ -115,5 +115,5 @@ uv run pytest python/a2ui_jupyter/tests
 
 The tests cover the widget bridge, built bundle, JavaScript adapter, and
 notebook examples. The Python tests cover message validation and queue
-behavior. The separate [JupyterLite demo](https://github.com/MRYingLEE/jupyterlite-demo)
+behavior. The separate [JupyterLite demo](https://github.com/MRYingLEE/a2ui-jupyterlite-demo.git)
 contains deployment inputs and kernel smoke tests.
