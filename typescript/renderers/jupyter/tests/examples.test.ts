@@ -246,7 +246,7 @@ describe('JavaScript kernel examples', () => {
   });
 
   it('replaces the submitted form with a confirmation', async () => {
-    const {surface, context} = await openNotebook('manual_smoke_test.ipynb');
+    const {surface, context} = await openNotebook('smoke_test.ipynb');
     const message = action('manual-smoke-test', 'submit', {name: 'Ada'});
     receive(surface, message);
     expect(context['actionData']).toEqual(message);

@@ -21,5 +21,5 @@ the cells in order.
 
 The interactive notebooks use `onAction` or `onMessage` callbacks. A cell
 cannot wait for a click in this kernel; use a later cell to inspect a stored
-action. Each numbered notebook and the manual smoke test has the same filename
+action. Each numbered notebook and the smoke test has the same filename
 and behavior as its Python counterpart.
