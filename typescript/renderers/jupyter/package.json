@@ -2,7 +2,7 @@
   "name": "@a2ui/jupyter",
   "version": "0.1.0",
   "license": "Apache-2.0",
-  "description": "JupyterLab renderer for A2UI",
+  "description": "Jupyter renderer for A2UI",
   "homepage": "https://a2ui.org/",
   "repository": {
     "directory": "typescript/renderers/jupyter",

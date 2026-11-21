@@ -95,7 +95,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('JupyterLab widget bridge', () => {
+describe('Jupyter widget bridge', () => {
   it('renders Markdown safely without a missing renderer warning', async () => {
     const warning = vi.spyOn(console, 'warn');
     const messages = surfaceMessages([
