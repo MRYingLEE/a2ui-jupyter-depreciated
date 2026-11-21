@@ -60,6 +60,10 @@ export default defineConfig({
         replacement: path.resolve('../../core/web_core/src/v0_9/index.ts'),
       },
       {
+        find: '@a2ui/web_core/universal',
+        replacement: path.resolve('../../core/web_core/src/universal/index.ts'),
+      },
+      {
         find: '@a2ui/web_core',
         replacement: path.resolve('../../core/web_core/src/index.ts'),
       },
