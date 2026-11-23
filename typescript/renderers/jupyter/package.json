@@ -45,6 +45,12 @@
   },
   "wireit": {
     "build": {
+      "command": "node scripts/copy-widget.mjs",
+      "dependencies": [
+        "bundle"
+      ]
+    },
+    "bundle": {
       "command": "node scripts/build.mjs",
       "dependencies": [
         "../../core/web_core:build",
@@ -53,7 +59,7 @@
       ],
       "files": [
         "src/**/*",
-        "scripts/**/*"
+        "scripts/build.mjs"
       ],
       "output": [
         "dist/widget.js",

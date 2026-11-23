@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {copyFile, mkdir} from 'node:fs/promises';
+import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDirectory = path.join(root, 'dist');
-const staticDirectory = path.resolve(root, '../../../python/a2ui_jupyter/src/a2ui_jupyter/static');
 
 await mkdir(distDirectory, {recursive: true});
-await mkdir(staticDirectory, {recursive: true});
 await build({
   entryPoints: {
     widget: path.join(root, 'src/widget.tsx'),
@@ -38,5 +36,3 @@ await build({
   minify: true,
   sourcemap: false,
 });
-await copyFile(path.join(distDirectory, 'widget.js'), path.join(staticDirectory, 'widget.js'));
-await copyFile(path.join(distDirectory, 'widget.css'), path.join(staticDirectory, 'widget.css'));
