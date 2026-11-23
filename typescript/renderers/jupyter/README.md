@@ -31,7 +31,8 @@ The JavaScript kernel adapter mirrors the Python surface API, except it cannot
 wait for user input:
 
 ```javascript
-const {A2UISurface} = await import('/files/a2ui/kernel.js'); // adjust to your site
+const adapter = new URL('../files/a2ui/kernel.js', document.baseURI);
+const {A2UISurface} = await import(adapter.href);
 const surface = new A2UISurface();
 display(surface);
 surface.onAction(action => console.log(action));
@@ -47,8 +48,8 @@ such as `onAction` or read queued actions from a later cell with
 The [JavaScript examples](./examples/) contain six numbered notebooks and a
 manual smoke test. They correspond to the [Python notebooks](../../../python/a2ui_jupyter/examples/).
 Open the notebooks from the JupyterLite site's contents, select the JavaScript
-kernel, and run their cells in order. Change the adapter URL in the first cell
-if the site does not serve it from `/files/a2ui/kernel.js`.
+kernel, and run their cells in order. The examples resolve the adapter against
+the JupyterLite site. Change the URL if you host the assets separately.
 
 ## Kernel support
 
@@ -89,7 +90,7 @@ documents message-log synchronization and saved widget state in
 
 For the JavaScript kernel, build the assets, host them together on a JupyterLite
 site, copy the example notebooks to its contents, and run
-[`smoke_test.ipynb`](../../../python/a2ui_jupyter/examples/smoke_test.ipynb). The test
+[`smoke_test.ipynb`](./examples/smoke_test.ipynb). The test
 displays a surface, sends an action, and reads it in a later cell. The
 [JupyterLite demo](https://github.com/MRYingLEE/a2ui-jupyterlite-demo.git) contains a
 browser smoke test. For a JupyterLab test with a Python kernel, see

@@ -96,8 +96,11 @@ describe('JavaScript kernel examples', () => {
   async function openNotebook(name: string) {
     const notebook = JSON.parse(readFileSync(resolve(examples, name), 'utf8')) as Notebook;
     const cells = notebook.cells.filter(cell => cell.cell_type === 'code');
+    const importAdapter = vi.fn(() => ({A2UISurface}));
     const context = createContext({
-      A2UISurface,
+      importAdapter,
+      URL,
+      document: {baseURI: 'https://example.test/a2ui-demo/lab/index.html'},
       display: vi.fn(),
       console,
       setTimeout: (callback: () => void) => callback(),
@@ -107,13 +110,13 @@ describe('JavaScript kernel examples', () => {
       if (!cell) {
         throw new Error(`Missing code cell ${index} in ${name}`);
       }
-      const source = cellSource(cell).replace(
-        /^const \{ A2UISurface \} = await import\([^\n]+\);\n/,
-        '',
-      );
+      const source = cellSource(cell).replace('await import(', 'await importAdapter(');
       await runInContext(`(async () => {\n${source}\n})()`, context);
     };
     await runCell(0);
+    expect(importAdapter).toHaveBeenCalledExactlyOnceWith(
+      'https://example.test/a2ui-demo/files/a2ui/kernel.js',
+    );
     return {context, runCell, surface: context['surface'] as Surface};
   }
 

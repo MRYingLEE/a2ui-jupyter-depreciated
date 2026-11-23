@@ -154,6 +154,32 @@ describe('A2UISurface (JavaScript kernel)', () => {
     ]);
   });
 
+  it('replays the snapshot sent even when the caller reuses a nested value', () => {
+    const surface = new A2UISurface();
+    const value = {rows: [{label: 'Original'}]};
+    const message = {
+      version: '1.0',
+      updateDataModel: {surfaceId: 'surface-1', path: '/data', value},
+    } as const;
+    surface.send(message);
+    value.rows[0]!.label = 'Changed locally';
+    receive(surface, {method: 'request_state'});
+
+    const snapshot = {
+      sequence: 0,
+      message: {
+        version: '1.0',
+        updateDataModel: {
+          surfaceId: 'surface-1',
+          path: '/data',
+          value: {rows: [{label: 'Original'}]},
+        },
+      },
+    };
+    expect(outgoingOf(surface)).toEqual([{method: 'custom', content: {type: 'a2ui', ...snapshot}}]);
+    expect(surface.get('message_log')).toEqual([snapshot]);
+  });
+
   it('publishes the pending log immediately when the browser requests state', () => {
     vi.useFakeTimers();
     const surface = new A2UISurface();

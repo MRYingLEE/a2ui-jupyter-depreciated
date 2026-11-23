@@ -90,13 +90,14 @@ export class A2UISurface extends WidgetBaseClass {
    */
   send(messages: AgentToRendererMessage | AgentToRendererMessage[]): void {
     const batch = Array.isArray(messages) ? messages : [messages];
-    for (const message of batch) {
+    const snapshots = batch.map(message => {
       const result = AgentToRendererMessageSchema.safeParse(message);
       if (!result.success) {
         throw new Error(`Invalid A2UI message: ${describeIssues(result.error.issues)}`);
       }
-    }
-    for (const message of batch) {
+      return structuredClone(result.data);
+    });
+    for (const message of snapshots) {
       const sequence = this.log.length;
       this.log.push({sequence, message});
       this._comm.send({
