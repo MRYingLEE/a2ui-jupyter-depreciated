@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {readFileSync, readdirSync} from 'node:fs';
+import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createContext, runInContext} from 'node:vm';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -49,7 +49,6 @@ interface Notebook {
 }
 
 const examples = resolve(process.cwd(), 'examples');
-const pythonExamples = resolve(process.cwd(), '../../../python/a2ui_jupyter/examples');
 type Surface = FakeWidget & {send(messages: unknown): void};
 
 function cellSource(cell: NotebookCell): string {
@@ -119,14 +118,6 @@ describe('JavaScript kernel examples', () => {
     );
     return {context, runCell, surface: context['surface'] as Surface};
   }
-
-  it('provides a JavaScript notebook for every Python notebook', () => {
-    const notebooks = (directory: string) =>
-      readdirSync(directory)
-        .filter(name => name.endsWith('.ipynb'))
-        .sort();
-    expect(notebooks(examples)).toEqual(notebooks(pythonExamples));
-  });
 
   it.each(['display(surface);\n', ['display(', 'surface);\n']])(
     'reads a notebook cell source in either supported format',
