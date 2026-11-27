@@ -1,4 +1,4 @@
-# Copyright 2026 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,7 +89,9 @@ def _is_number(value: Any) -> bool:
 
 
 def _is_list(value: Any) -> bool:
-    return isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+    return isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
 
 
 def _copy_json(value: Any, max_depth: int, depth: int = 0) -> Any:
@@ -104,7 +106,9 @@ def _copy_json(value: Any, max_depth: int, depth: int = 0) -> Any:
     if _is_number(value):
         if isinstance(value, float) and not math.isfinite(value):
             _fail("Unsupported number")
-        if (isinstance(value, int) or value.is_integer()) and abs(value) > MAX_SAFE_INTEGER:
+        if (isinstance(value, int) or value.is_integer()) and abs(
+            value
+        ) > MAX_SAFE_INTEGER:
             _fail("Unsupported number")
         return value
     if _is_list(value):
@@ -138,10 +142,16 @@ def _action_names(names: Any, minimum: int) -> list[str]:
     if (
         result is None
         or not minimum <= len(result) <= MAX_ACTIONS
-        or any(not isinstance(name, str) or not _ACTION_NAME.fullmatch(name) for name in result)
+        or any(
+            not isinstance(name, str) or not _ACTION_NAME.fullmatch(name)
+            for name in result
+        )
         or len(set(result)) != len(result)
     ):
-        _fail(f"submit and cancel must list up to {MAX_ACTIONS} unique, valid action names")
+        _fail(
+            f"submit and cancel must list up to {MAX_ACTIONS} unique, valid action"
+            " names"
+        )
     return result
 
 
@@ -207,7 +217,9 @@ def decode_reply(raw: str, submit: Sequence[str]) -> dict[str, Any]:
     if not isinstance(raw, str) or _utf8_size(raw) > MAX_REPLY_BYTES:
         _fail("Invalid or oversized reply")
     try:
-        reply = json.loads(raw, object_pairs_hook=_unique_pairs, parse_constant=_reject_constant)
+        reply = json.loads(
+            raw, object_pairs_hook=_unique_pairs, parse_constant=_reject_constant
+        )
     except (ValueError, RecursionError) as error:
         raise A2UIInputError("Invalid JSON reply") from error
     if not isinstance(reply, dict):
@@ -359,7 +371,12 @@ def _field_component(
             component["placeholder"] = field["placeholder"]
         return component
     if kind == "checkbox":
-        return {"id": component_id, "component": "CheckBox", "label": label, "value": value}
+        return {
+            "id": component_id,
+            "component": "CheckBox",
+            "label": label,
+            "value": value,
+        }
     if kind in ("choice", "multiChoice"):
         return {
             "id": component_id,
@@ -441,7 +458,8 @@ def a2ui_form(
         name = field.get("name") if isinstance(field, Mapping) else None
         if not isinstance(name, str) or not _FIELD_NAME.fullmatch(name):
             _fail(
-                "Each field needs a name of letters, digits and underscores starting with a letter"
+                "Each field needs a name of letters, digits and underscores starting"
+                " with a letter"
             )
         if name in names:
             _fail(f'Duplicate field name "{name}"')
@@ -474,9 +492,14 @@ def a2ui_form(
         condition = (
             _required_check(required[0])
             if len(required) == 1
-            else {"@call": "and", "args": {"values": [_required_check(n) for n in required]}}
+            else {
+                "@call": "and",
+                "args": {"values": [_required_check(n) for n in required]},
+            }
         )
-        submit["@checks"] = [{"condition": condition, "message": "Complete the required fields"}]
+        submit["@checks"] = [
+            {"condition": condition, "message": "Complete the required fields"}
+        ]
     buttons: list[dict[str, Any]] = []
     button_ids = []
     if cancel_label is not None:
@@ -491,7 +514,10 @@ def a2ui_form(
             {"id": "form_cancel_label", "component": "Text", "text": cancel_label},
         ]
     button_ids.append("form_submit")
-    buttons += [submit, {"id": "form_submit_label", "component": "Text", "text": submit_label}]
+    buttons += [
+        submit,
+        {"id": "form_submit_label", "component": "Text", "text": submit_label},
+    ]
 
     children: list[str] = []
     components: list[dict[str, Any]] = [
@@ -500,25 +526,28 @@ def a2ui_form(
     ]
     if title is not None:
         children.append("form_title")
-        components.append({"id": "form_title", "component": "Text", "text": f"### {title}"})
+        components.append(
+            {"id": "form_title", "component": "Text", "text": f"### {title}"}
+        )
     children += [component["id"] for component in field_components]
     children.append("form_actions")
     components += field_components
-    components.append(
-        {"id": "form_actions", "component": "Row", "justify": "end", "children": button_ids}
-    )
+    components.append({
+        "id": "form_actions",
+        "component": "Row",
+        "justify": "end",
+        "children": button_ids,
+    })
     components += buttons
-    return [
-        {
-            "version": "1.0",
-            "createSurface": {
-                "surfaceId": surface_id,
-                "catalogId": BASIC_CATALOG_ID,
-                "components": components,
-                "dataModel": data_model,
-            },
-        }
-    ]
+    return [{
+        "version": "1.0",
+        "createSurface": {
+            "surfaceId": surface_id,
+            "catalogId": BASIC_CATALOG_ID,
+            "components": components,
+            "dataModel": data_model,
+        },
+    }]
 
 
 def coerce_form_data(
@@ -567,7 +596,9 @@ def a2ui_form_input(
         messages,
         prompt=prompt,
         submit=(options.get("submit_action", "submit"),),
-        cancel=() if cancel_label is None else (options.get("cancel_action", "cancel"),),
+        cancel=()
+        if cancel_label is None
+        else (options.get("cancel_action", "cancel"),),
         input=input,
     )
     return coerce_form_data(fields, result["data"])
