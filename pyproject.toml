@@ -145,6 +145,7 @@ exclude = [
     "^python/a2ui_agent/tests/",
     "^python/a2ui_a2a/tests/",
     "^python/a2ui_adk/tests/",
+    "^python/a2ui_form/tests/",
     "^conformance/tests/",
     "^e2e/agents/python/tests/",
     "^eval/",

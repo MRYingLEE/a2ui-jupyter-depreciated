@@ -103,7 +103,7 @@ describe('ColumnComponent', () => {
   it('should apply flex styles from props', () => {
     fixture.detectChanges();
     const style = window.getComputedStyle(fixture.debugElement.nativeElement);
-    expect(style.justifyContent).toBe('flex-start');
+    expect(fixture.nativeElement.style.justifyContent).toBe('flex-start');
     expect(style.alignItems).toBe('stretch');
   });
 

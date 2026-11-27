@@ -26,7 +26,7 @@ import math
 import re
 from collections.abc import Callable, Mapping, Sequence
 from decimal import Decimal
-from typing import Any
+from typing import Any, NoReturn, TypeGuard
 
 MARKER = "jupyterlite-a2ui-input:v1:"
 MAX_REQUEST_BYTES = 262144
@@ -73,7 +73,7 @@ class A2UIInputCancelled(A2UIInputError):  # noqa: N818 - matches the other help
     """The user cancelled the A2UI input form."""
 
 
-def _fail(message: str) -> None:
+def _fail(message: str) -> NoReturn:
     raise A2UIInputError(message)
 
 
@@ -84,11 +84,11 @@ def _utf8_size(value: str) -> int:
         raise A2UIInputError("Invalid Unicode") from error
 
 
-def _is_number(value: Any) -> bool:
+def _is_number(value: Any) -> TypeGuard[int | float]:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def _is_list(value: Any) -> bool:
+def _is_list(value: Any) -> TypeGuard[Sequence[Any]]:
     return isinstance(value, Sequence) and not isinstance(
         value, (str, bytes, bytearray)
     )
@@ -159,6 +159,8 @@ def _validate_messages(messages: Any) -> list[dict[str, Any]]:
     if not _is_list(messages) or not 1 <= len(messages) <= MAX_MESSAGES:
         _fail(f"messages must be a list of 1 to {MAX_MESSAGES} A2UI messages")
     copied = _copy_json(messages, MAX_REQUEST_DEPTH)
+    if not isinstance(copied, list):
+        _fail("messages must be a list of A2UI messages")
     surface_id = None
     for index, message in enumerate(copied):
         if not isinstance(message, dict) or message.get("version") != "1.0":
@@ -274,7 +276,10 @@ def _js_number(value: int | float) -> str:
     if isinstance(value, int) or (value.is_integer() and abs(value) < 1e21):
         return str(int(value))
     sign = "-" if value < 0 else ""
-    _, digit_tuple, exponent = Decimal(repr(abs(value))).normalize().as_tuple()
+    decimal_tuple = Decimal(repr(abs(value))).normalize().as_tuple()
+    _, digit_tuple, exponent = decimal_tuple
+    if not isinstance(exponent, int):
+        _fail("Number must be finite")
     digits = "".join(map(str, digit_tuple))
     k = len(digits)
     n = exponent + k
@@ -300,7 +305,7 @@ def _options(field: Mapping[str, Any], name: str) -> list[dict[str, str]]:
     raw = field.get("options")
     if not _is_list(raw) or not raw:
         _fail(f'Field "{name}" needs a non-empty options list')
-    options = []
+    options: list[dict[str, str]] = []
     for option in raw:
         if isinstance(option, str):
             options.append({"label": option, "value": option})
@@ -358,7 +363,7 @@ def _field_component(
     value = {"@path": f"/{name}"}
     variant = _TEXT_VARIANTS.get(kind)
     if variant:
-        component = {
+        component: dict[str, Any] = {
             "id": component_id,
             "component": "TextField",
             "label": label,
@@ -466,7 +471,7 @@ def a2ui_form(
         names.add(name)
         kind = field.get("type")
         kind = "text" if kind is None else kind
-        if kind not in FIELD_TYPES:
+        if not isinstance(kind, str) or kind not in FIELD_TYPES:
             _fail(f'Field "{name}" has unknown type "{kind}"')
         label = field.get("label")
         label = name if label is None else label
