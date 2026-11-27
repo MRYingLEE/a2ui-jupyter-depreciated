@@ -1,0 +1,559 @@
+{
+  "builder": [
+    {
+      "name": "all_field_types",
+      "fields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "required": true,
+          "placeholder": "Ada"
+        },
+        {
+          "name": "notes",
+          "type": "longText"
+        },
+        {
+          "name": "secret",
+          "type": "password",
+          "label": "Secret"
+        },
+        {
+          "name": "age",
+          "type": "number",
+          "label": "Age",
+          "value": 42
+        },
+        {
+          "name": "agree",
+          "type": "checkbox",
+          "label": "I agree",
+          "value": true
+        },
+        {
+          "name": "color",
+          "type": "choice",
+          "label": "Color",
+          "options": [
+            "red",
+            {
+              "label": "Green",
+              "value": "green"
+            }
+          ],
+          "value": "red",
+          "required": true
+        },
+        {
+          "name": "tags",
+          "type": "multiChoice",
+          "options": ["a", "b"]
+        },
+        {
+          "name": "level",
+          "type": "slider",
+          "label": "Level",
+          "min": 1,
+          "max": 10,
+          "steps": 9
+        },
+        {
+          "name": "day",
+          "type": "date",
+          "label": "Day"
+        },
+        {
+          "name": "at",
+          "type": "time"
+        },
+        {
+          "name": "when",
+          "type": "datetime",
+          "value": "2026-01-02T03:04:00"
+        }
+      ],
+      "options": {
+        "title": "Profile",
+        "surfaceId": "profile",
+        "submitLabel": "Save",
+        "cancelLabel": "Discard",
+        "submitAction": "save",
+        "cancelAction": "discard"
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "profile",
+            "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "form_column"
+              },
+              {
+                "id": "form_column",
+                "component": "Column",
+                "children": [
+                  "form_title",
+                  "field_name",
+                  "field_notes",
+                  "field_secret",
+                  "field_age",
+                  "field_agree",
+                  "field_color",
+                  "field_tags",
+                  "field_level",
+                  "field_day",
+                  "field_at",
+                  "field_when",
+                  "form_actions"
+                ]
+              },
+              {
+                "id": "form_title",
+                "component": "Text",
+                "text": "### Profile"
+              },
+              {
+                "id": "field_name",
+                "component": "TextField",
+                "label": "Name",
+                "value": {
+                  "@path": "/name"
+                },
+                "variant": "shortText",
+                "placeholder": "Ada",
+                "@checks": [
+                  {
+                    "condition": {
+                      "@call": "required",
+                      "args": {
+                        "value": {
+                          "@path": "/name"
+                        }
+                      }
+                    },
+                    "message": "Name is required"
+                  }
+                ]
+              },
+              {
+                "id": "field_notes",
+                "component": "TextField",
+                "label": "notes",
+                "value": {
+                  "@path": "/notes"
+                },
+                "variant": "longText"
+              },
+              {
+                "id": "field_secret",
+                "component": "TextField",
+                "label": "Secret",
+                "value": {
+                  "@path": "/secret"
+                },
+                "variant": "obscured"
+              },
+              {
+                "id": "field_age",
+                "component": "TextField",
+                "label": "Age",
+                "value": {
+                  "@path": "/age"
+                },
+                "variant": "number"
+              },
+              {
+                "id": "field_agree",
+                "component": "CheckBox",
+                "label": "I agree",
+                "value": {
+                  "@path": "/agree"
+                }
+              },
+              {
+                "id": "field_color",
+                "component": "ChoicePicker",
+                "label": "Color",
+                "variant": "mutuallyExclusive",
+                "options": [
+                  {
+                    "label": "red",
+                    "value": "red"
+                  },
+                  {
+                    "label": "Green",
+                    "value": "green"
+                  }
+                ],
+                "value": {
+                  "@path": "/color"
+                },
+                "@checks": [
+                  {
+                    "condition": {
+                      "@call": "required",
+                      "args": {
+                        "value": {
+                          "@path": "/color"
+                        }
+                      }
+                    },
+                    "message": "Color is required"
+                  }
+                ]
+              },
+              {
+                "id": "field_tags",
+                "component": "ChoicePicker",
+                "label": "tags",
+                "variant": "multipleSelection",
+                "options": [
+                  {
+                    "label": "a",
+                    "value": "a"
+                  },
+                  {
+                    "label": "b",
+                    "value": "b"
+                  }
+                ],
+                "value": {
+                  "@path": "/tags"
+                }
+              },
+              {
+                "id": "field_level",
+                "component": "Slider",
+                "label": "Level",
+                "min": 1,
+                "max": 10,
+                "value": {
+                  "@path": "/level"
+                },
+                "steps": 9
+              },
+              {
+                "id": "field_day",
+                "component": "DateTimeInput",
+                "label": "Day",
+                "value": {
+                  "@path": "/day"
+                },
+                "enableDate": true,
+                "enableTime": false
+              },
+              {
+                "id": "field_at",
+                "component": "DateTimeInput",
+                "label": "at",
+                "value": {
+                  "@path": "/at"
+                },
+                "enableDate": false,
+                "enableTime": true
+              },
+              {
+                "id": "field_when",
+                "component": "DateTimeInput",
+                "label": "when",
+                "value": {
+                  "@path": "/when"
+                },
+                "enableDate": true,
+                "enableTime": true
+              },
+              {
+                "id": "form_actions",
+                "component": "Row",
+                "justify": "end",
+                "children": ["form_cancel", "form_submit"]
+              },
+              {
+                "id": "form_cancel",
+                "component": "Button",
+                "child": "form_cancel_label",
+                "action": {
+                  "event": {
+                    "name": "discard"
+                  }
+                }
+              },
+              {
+                "id": "form_cancel_label",
+                "component": "Text",
+                "text": "Discard"
+              },
+              {
+                "id": "form_submit",
+                "component": "Button",
+                "child": "form_submit_label",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "save"
+                  }
+                },
+                "@checks": [
+                  {
+                    "condition": {
+                      "@call": "and",
+                      "args": {
+                        "values": [
+                          {
+                            "@call": "required",
+                            "args": {
+                              "value": {
+                                "@path": "/name"
+                              }
+                            }
+                          },
+                          {
+                            "@call": "required",
+                            "args": {
+                              "value": {
+                                "@path": "/color"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "message": "Complete the required fields"
+                  }
+                ]
+              },
+              {
+                "id": "form_submit_label",
+                "component": "Text",
+                "text": "Save"
+              }
+            ],
+            "dataModel": {
+              "name": "",
+              "notes": "",
+              "secret": "",
+              "age": "42",
+              "agree": true,
+              "color": ["red"],
+              "tags": [],
+              "level": 1,
+              "day": "",
+              "at": "",
+              "when": "2026-01-02T03:04:00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "defaults",
+      "fields": [
+        {
+          "name": "answer"
+        }
+      ],
+      "options": {},
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "a2ui-form",
+            "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "form_column"
+              },
+              {
+                "id": "form_column",
+                "component": "Column",
+                "children": ["field_answer", "form_actions"]
+              },
+              {
+                "id": "field_answer",
+                "component": "TextField",
+                "label": "answer",
+                "value": {
+                  "@path": "/answer"
+                },
+                "variant": "shortText"
+              },
+              {
+                "id": "form_actions",
+                "component": "Row",
+                "justify": "end",
+                "children": ["form_cancel", "form_submit"]
+              },
+              {
+                "id": "form_cancel",
+                "component": "Button",
+                "child": "form_cancel_label",
+                "action": {
+                  "event": {
+                    "name": "cancel"
+                  }
+                }
+              },
+              {
+                "id": "form_cancel_label",
+                "component": "Text",
+                "text": "Cancel"
+              },
+              {
+                "id": "form_submit",
+                "component": "Button",
+                "child": "form_submit_label",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "submit"
+                  }
+                }
+              },
+              {
+                "id": "form_submit_label",
+                "component": "Text",
+                "text": "Submit"
+              }
+            ],
+            "dataModel": {
+              "answer": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "no_cancel",
+      "fields": [
+        {
+          "name": "ok",
+          "type": "checkbox"
+        }
+      ],
+      "options": {
+        "cancelLabel": null
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "a2ui-form",
+            "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "form_column"
+              },
+              {
+                "id": "form_column",
+                "component": "Column",
+                "children": ["field_ok", "form_actions"]
+              },
+              {
+                "id": "field_ok",
+                "component": "CheckBox",
+                "label": "ok",
+                "value": {
+                  "@path": "/ok"
+                }
+              },
+              {
+                "id": "form_actions",
+                "component": "Row",
+                "justify": "end",
+                "children": ["form_submit"]
+              },
+              {
+                "id": "form_submit",
+                "component": "Button",
+                "child": "form_submit_label",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "submit"
+                  }
+                }
+              },
+              {
+                "id": "form_submit_label",
+                "component": "Text",
+                "text": "Submit"
+              }
+            ],
+            "dataModel": {
+              "ok": false
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "coercion": [
+    {
+      "fields": [
+        {
+          "name": "n",
+          "type": "number"
+        },
+        {
+          "name": "t"
+        }
+      ],
+      "data": {
+        "n": " 3.5 ",
+        "t": "7"
+      },
+      "expected": {
+        "n": 3.5,
+        "t": "7"
+      }
+    },
+    {
+      "fields": [
+        {
+          "name": "n",
+          "type": "number"
+        }
+      ],
+      "data": {
+        "n": ""
+      },
+      "expected": {
+        "n": null
+      }
+    },
+    {
+      "fields": [
+        {
+          "name": "n",
+          "type": "number"
+        }
+      ],
+      "data": {
+        "n": "-1e3"
+      },
+      "expected": {
+        "n": -1000
+      }
+    },
+    {
+      "fields": [
+        {
+          "name": "n",
+          "type": "number"
+        }
+      ],
+      "data": {
+        "n": "0x10"
+      },
+      "error": true
+    }
+  ]
+}
