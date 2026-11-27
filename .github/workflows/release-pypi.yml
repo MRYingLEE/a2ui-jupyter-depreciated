@@ -58,7 +58,7 @@ on:
       package:
         description: >-
           Packages to release: all, or comma-separated names from a2ui-core,
-          a2ui-agent-sdk, a2ui-a2a, a2ui-adk. Ignored for TestPyPI.
+          a2ui-agent-sdk, a2ui-a2a, a2ui-adk (for example a2ui-a2a,a2ui-adk)
         required: true
         type: string
       bump:
@@ -82,10 +82,6 @@ on:
         description: Stage in Artifact Registry without publishing
         type: boolean
         default: true
-      publish_testpypi:
-        description: Publish a2ui-jupyter to TestPyPI instead of running a release
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -112,7 +108,6 @@ env:
 jobs:
   build:
     name: Build and verify distributions
-    if: ${{ !inputs.publish_testpypi }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -255,59 +250,6 @@ jobs:
           path: staging-artifacts
           include-hidden-files: true
           retention-days: 7
-
-  testpypi-build:
-    name: Build a2ui-jupyter for TestPyPI
-    if: ${{ inputs.publish_testpypi }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: ./.github/actions/setup-python
-        with:
-          python-version: "3.12"
-
-      - name: Build distributions
-        working-directory: python/a2ui_jupyter
-        run: uv build --out-dir dist
-
-      - name: Check distribution metadata
-        working-directory: python/a2ui_jupyter
-        run: uv run --isolated --with twine twine check dist/*
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: a2ui-jupyter-testpypi
-          path: python/a2ui_jupyter/dist/*
-          if-no-files-found: error
-          retention-days: 1
-
-  testpypi-publish:
-    name: Publish a2ui-jupyter to TestPyPI
-    needs: testpypi-build
-    if: ${{ inputs.publish_testpypi }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      id-token: write
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: a2ui-jupyter-testpypi
-          path: dist
-
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
 
   release:
     name: Stage and publish
