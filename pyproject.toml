@@ -33,6 +33,7 @@ members = [
   "python/a2ui_adk",
   "python/a2ui_agent",
   "python/a2ui_core",
+  "python/a2ui_jupyter",
   "eval",
   "samples/agent/adk/custom-components-example",
   "samples/agent/adk/restaurant_finder",
@@ -59,6 +60,7 @@ dev = [
     "types-PyYAML>=6.0.12.20241221",
     "types-regex>=2024.11.6",
     "pytest-asyncio>=1.3.0",
+    "jupyter-client>=8.6.0",
 ]
 release = [
     "hatch>=1.14.0",
@@ -75,6 +77,7 @@ testpaths = [
     "python/a2ui_adk/tests",
     "python/a2ui_agent/tests",
     "python/a2ui_core/tests",
+    "python/a2ui_jupyter/tests",
     "eval/tests",
     "samples/agent/adk/tests",
     "samples/community/agent/adk/file_upload_summarizer/tests",
@@ -94,6 +97,7 @@ norecursedirs = [
 # them. See python/a2ui_core/tests/timing_harness.py.
 addopts = "--import-mode=importlib -m 'not performance'"
 markers = [
+    "integration: requires a live Jupyter kernel",
     "performance: times an operation; run apart from the other tests with `-m performance`",
 ]
 
@@ -103,6 +107,7 @@ default = true
 
 [tool.uv.sources]
 a2ui-core = { workspace = true }
+a2ui-jupyter = { workspace = true }
 a2ui-agent-sdk = { workspace = true }
 a2ui-a2a = { workspace = true }
 a2ui-adk = { workspace = true }
@@ -132,7 +137,7 @@ pyink-annotation-pragmas = [
 strict = true
 explicit_package_bases = true
 namespace_packages = true
-mypy_path = "python/a2ui_core/src:python/a2ui_agent/src:python/a2ui_a2a/src:python/a2ui_adk/src:blueprints:eval:eval/bin"
+mypy_path = "python/a2ui_core/src:python/a2ui_agent/src:python/a2ui_a2a/src:python/a2ui_adk/src:python/a2ui_jupyter/src:blueprints:eval:eval/bin"
 exclude = [
     "^python/a2ui_core/tests/",
     "^python/a2ui_agent/tests/",
@@ -156,6 +161,10 @@ module = [
     "antlr4.*",
 ]
 follow_imports = "skip"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["jupyter_ui_poll"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
