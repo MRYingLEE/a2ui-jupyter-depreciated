@@ -96,6 +96,29 @@ describe('registerUniversalElement', () => {
     assert.strictEqual(registry.get('a2ui-sub-test'), SubElementA);
   });
 
+  it('no-ops when the same element is evaluated again from another module instance', () => {
+    const defineElement = () => class extends HTMLElement {};
+    const first = defineElement();
+    const second = defineElement();
+    assert.notStrictEqual(first, second);
+
+    registerUniversalElement({
+      name: 'Test',
+      schema: z.object({}),
+      tagName: 'a2ui-test',
+      element: first,
+    });
+    assert.doesNotThrow(() => {
+      registerUniversalElement({
+        name: 'Test',
+        schema: z.object({}),
+        tagName: 'a2ui-test',
+        element: second,
+      });
+    });
+    assert.strictEqual(registry.get('a2ui-test'), first);
+  });
+
   it('throws when registering a subclass over an already-registered base constructor', () => {
     class SubElementA extends MockElementA {}
     registry.set('a2ui-base-test', MockElementA);
